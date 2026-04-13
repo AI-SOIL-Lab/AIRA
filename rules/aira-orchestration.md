@@ -17,6 +17,18 @@ alwaysApply: true
 
 多个意图同时出现时，按 ingest → research → health 顺序执行。
 
+### ingest 统一处理逻辑
+
+`ingest` skill 统一处理所有知识库录入场景：
+
+1. **判断是否需要 raw 录入**（用户指定了文件/URL → 是）
+2. **如果需要**：调用 `aira-ingest` CLI tool 录入 raw 文件
+3. **git diff** 发现所有新文件（`git diff HEAD -- vault/raw/`，含用户手动录入的）
+4. **对每个新文件**：生成 digest → 写入 `vault/digest/` → 更新 `vault/index.md`
+5. **Git commit**
+
+**aira-ingest（CLI tool）：** 位于 `skills/ingest/ingest_raw/` 包中，提供确定性的文件转换录入功能。
+
 ## Git 协作协议
 
 **每次操作必须遵循 git 前置/后置协议，三个 skill 共用：**

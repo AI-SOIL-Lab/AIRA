@@ -38,22 +38,32 @@ AIRA/
 
 ## 核心 Skills
 
-### 1. Ingest-Raw（文件录入）
+### 1. Ingest（知识库录入 — 统一入口）
 
-**触发：** "把这篇论文加进来"、"导入这个 PDF"、"保存这个 URL"、"这是实验数据"
+**触发：** "把这篇论文加进来"、"处理新文件"、"检查是否有新内容"、"运行 ingest"
+
+**实现方式：** `ingest` 是一个 skill（位于 `skills/ingest/`），统一处理所有知识库录入场景。内部包含 CLI tool（`aira-ingest`）用于确定性的文件转换录入。
+
+**使用方式：** 用户只需告诉 AI 要录入或处理文件，AI 自动判断流程：
+
+| 用户意图 | AI 处理流程 |
+|---------|-----------|
+| "把这篇论文加进来"（指定了文件/URL） | 文件转换录入 → git diff 发现新文件 → 生成 digest → 更新 index |
+| "处理新文件"（没有指定文件） | git diff 发现新文件（含用户手动录入的） → 生成 digest → 更新 index |
 
 **流程：**
-1. Git 检查 + Obsidian 同步
-2. 解析输入类型（PDF/URL/CSV/文本）→ 选择转换方式
-3. 调用外部 skill 转换为 Markdown → 写入 `vault/raw/`
-4. Git commit
+1. 判断是否需要 raw 录入（用户指定了文件/URL → 是）
+2. 如果需要：调用 `aira-ingest` CLI tool 录入 raw 文件
+3. `git diff HEAD -- vault/raw/` 发现所有新文件（含用户手动录入的）
+4. 对每个新文件：生成 digest → 写入 `vault/digest/` → 更新 `vault/index.md`
+5. Git commit
 
-**可用外部 Skills：**
-- `mineru` — PDF/文档 → Markdown 转换
-- `firecrawl` — 网页抓取 → Markdown
-- `xlsx` — Excel/CSV 解析
-
-**注意：** ingest-raw 只负责将文件录入 raw 目录，不生成 digest 或更新 index。录入完成后，需运行 ingest skill 进行后续处理。
+**支持的输入类型：**
+| 输入 | 转换工具 | 说明 |
+|------|---------|------|
+| PDF/DOCX/PPTX | `mineru` | 默认 extract 模式，失败自动降级 flash-extract |
+| URL | `mineru crawl` | 需要 Token |
+| MD/TXT | 直接复制 | 保留原文件名 |
 
 ### 2. Ingest（知识库接入）
 
