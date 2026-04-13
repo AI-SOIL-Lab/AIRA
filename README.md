@@ -29,14 +29,23 @@ raw/              →  完整内容                        （最重，最终推
 AIRA 依赖三个外部 skill 来处理不同格式的输入：
 
 ```bash
-# PDF → Markdown
-npx skills add anthropics/skills@pdf -y
+# PDF → Markdown（基于 MinerU API，已内置，无需安装）
+# 如需使用 MinerU 精准解析 API，请配置 .env 文件中的 MINERU_TOKEN
 
 # Excel/CSV 解析
 npx skills add anthropics/skills@xlsx -y
 
 # 网页抓取 → Markdown
 npx skills add firecrawl/cli@firecrawl -y
+```
+
+**PDF Skill 配置：**
+```bash
+# 复制环境变量模板
+cp .env.example .env
+
+# 编辑 .env 文件，填入你的 MinerU Token（可选）
+# Token 申请地址：https://mineru.net/apiManage
 ```
 
 ### 初始化知识库

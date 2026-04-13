@@ -24,16 +24,22 @@ raw/              →  完整内容                        （最重，最终推
 ```
 vault/
 ├── index.md                    # 全局索引
-├── raw/                        # 原文，只被 digest 链接
-│   ├── paper_001.md
-│   ├── paper_002.md
+├── raw/                        # 原文，只被 digest 链接（保留原始格式）
+│   ├── paper_001.pdf
+│   ├── paper_002.pdf
+│   ├── paper_003.md            # URL 抓取的网页转为 Markdown
 │   ├── idea_005.md
-│   └── exp_003.md
+│   ├── exp_006.xlsx
+│   ├── exp_007.csv
+│   └── paper_008.docx
 └── digest/                     # 摘要，被 index 链接，链接到 raw
     ├── paper_001_digest.md
     ├── paper_002_digest.md
+    ├── paper_003_digest.md
     ├── idea_005_digest.md
-    └── exp_003_digest.md
+    ├── exp_006_digest.md
+    ├── exp_007_digest.md
+    └── paper_008_digest.md
 ```
 
 命名规则：digest 加 `_digest` 后缀，Obsidian 的 `[[]]` 对纯文件名链接支持最好。
@@ -88,9 +94,16 @@ raw: "[[文件名]]"
 
 正文就是摘要，不嵌套 summary callout。正文自由组织，模型根据 type 自行决定写哪些 section。
 
-### raw/xxx.md
+### raw/xxx
 
-```markdown
+raw 保留原始文件，不做格式转换。
+
+```
+# 对于 PDF/XLSX/DOCX 等二进制文件：直接复制原始文件
+vault/raw/paper_001.pdf          # 原始 PDF 文件
+vault/raw/exp_006.xlsx           # 原始 Excel 文件
+
+# 对于 Markdown 文件（URL 抓取、用户口述等）：
 ---
 type: paper | idea | experiment | discussion
 source: 来源标识
@@ -99,10 +112,10 @@ created: YYYY-MM-DD
 
 # 标题
 
-（完整原文 / PDF 转换后的 Markdown / 用户原始笔记）
+（完整原文 / 网页转换后的 Markdown / 用户原始笔记）
 ```
 
-raw 保留原始内容，frontmatter 极简（元数据已在 digest 中）。
+raw 保留原始内容，frontmatter 仅对 Markdown 类型的 raw 文件添加（元数据已在 digest 中）。
 
 ---
 

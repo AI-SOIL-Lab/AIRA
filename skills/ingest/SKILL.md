@@ -17,7 +17,7 @@ description: Use this skill when the user wants to add content to the AIRA knowl
 
 | Skill | 用途 | 调用时机 |
 |-------|------|---------|
-| `pdf` | PDF → Markdown 转换 | 用户输入为 `.pdf` 文件时 |
+| `pdf` | PDF → Markdown 转换（基于 MinerU API） | 用户输入为 `.pdf` 文件时 |
 | `firecrawl` | 网页抓取 → Markdown | 用户输入为 URL 时 |
 | `xlsx` | Excel/CSV 解析 | 用户输入为 `.xlsx` / `.csv` 文件时 |
 

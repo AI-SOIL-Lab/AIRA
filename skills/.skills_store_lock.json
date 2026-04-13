@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "docx-cn": {
+      "name": "Docx Cn",
+      "zip_url": "https://lightmake.site/api/v1/download?slug=docx-cn",
+      "source": "skillhub",
+      "version": "1.0.1"
+    }
+  }
+}
