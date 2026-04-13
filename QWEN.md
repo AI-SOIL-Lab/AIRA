@@ -38,35 +38,47 @@ AIRA/
 
 ## 核心 Skills
 
-### 1. Ingest（内容入库）
+### 1. Ingest-Raw（文件录入）
 
-**触发：** "把这篇论文加进来"、"我有个想法"、"这是实验数据"
+**触发：** "把这篇论文加进来"、"导入这个 PDF"、"保存这个 URL"、"这是实验数据"
 
 **流程：**
 1. Git 检查 + Obsidian 同步
-2. 解析输入（PDF/URL/CSV/文本）→ 写入 `vault/raw/{type}_{NNN}.md`
-3. AI 生成 digest → 写入 `vault/digest/{type}_{NNN}_digest.md`
-4. 更新 `vault/index.md`
-5. Git commit
+2. 解析输入类型（PDF/URL/CSV/文本）→ 选择转换方式
+3. 调用外部 skill 转换为 Markdown → 写入 `vault/raw/`
+4. Git commit
 
 **可用外部 Skills：**
 - `mineru` — PDF/文档 → Markdown 转换
 - `firecrawl` — 网页抓取 → Markdown
 - `xlsx` — Excel/CSV 解析
 
-### 2. Research（知识库问答）
+**注意：** ingest-raw 只负责将文件录入 raw 目录，不生成 digest 或更新 index。录入完成后，需运行 ingest skill 进行后续处理。
+
+### 2. Ingest（知识库接入）
+
+**触发：** "处理新文件"、"检查是否有新内容"、"运行 ingest"
+
+**流程：**
+1. Git 检查，`git diff` 扫描 `vault/raw/` 中的新文件
+2. 对每个新文件：AI 生成 digest → 写入 `vault/digest/{filename}_digest.md`
+3. 更新 `vault/index.md`
+4. Git commit
+
+### 3. Research（知识库问答）
 
 **触发：** "X 和 Y 的关系"、"基于我的数据"、"对比这两篇论文"
 
 **流程（三层渐进筛选）：**
 1. Git 检查 + Obsidian 同步
-2. 读 `index.md` → 初筛（30-50 条）
-3. 读候选 digest → 精筛（5-10 条）
-4. 读选中 raw → 推理回答
-5. 对话中产生新洞见 → 询问用户是否记入知识库
-6. Git commit（如有文件变更）
+2. 如果有 raw/ 中的新文件未处理 → 先补跑 ingest
+3. 读 `index.md` → 初筛（30-50 条）
+4. 读候选 digest → 精筛（5-10 条）
+5. 读选中 raw → 推理回答
+6. 对话中产生新洞见 → 询问用户是否记入知识库
+7. Git commit（如有文件变更）
 
-### 3. Health（知识库健康检查）
+### 4. Health（知识库健康检查）
 
 **触发：** "检查健康度"、"修复断链"、"找孤立文档"
 
