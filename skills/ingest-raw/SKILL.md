@@ -124,26 +124,13 @@ vault/raw/
         └── table1.csv
 ```
 
-**注意：** 如果资源文件较多或较大，在 git commit 时一并加入（`git add vault/raw/{filename}.md vault/raw/{资源文件夹}/`）。
-
 #### 写入后校验
 
 保存 raw 后检查文件大小和行数，如果明显小于预期（如 PDF 原文 20 页但 raw 只有 50 行），告警并重试。同时检查 Markdown 中引用的图片文件是否都已存在。
 
-### Step 4：Git 提交
-
-```
-git add vault/raw/{filename}.md vault/raw/{资源文件夹}/
-git commit -m "ingest-raw: {filename} ({type})"
-```
-
-**注意：** 如果有图片等资源文件，必须一并加入 git commit。
-
-**提交后提示：** raw 文件已录入，提示用户"raw 文件已保存，运行 ingest 生成 digest 并更新 index"。
-
 ## 批量导入
 
-用户一次提供多篇内容时，逐篇执行 Step 1-3，最后统一 git commit。批量导入完成后，提示用户运行 ingest skill 处理新文件。
+用户一次提供多篇内容时，逐篇执行 Step 1-3。全部录入完成后，提示用户运行 ingest skill 处理新文件。
 
 ## 约束
 
