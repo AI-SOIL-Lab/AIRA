@@ -45,11 +45,42 @@ description: Use this skill when the user wants to add raw files to vault/raw/. 
 
 如果用户没有明确指定 type，根据内容自动判断。
 
-### Step 2：执行转换
+### Step 2：执行转换 / 复制
 
-调用对应的外部 skill，将原始内容转换为 Markdown。
+根据输入类型，选择转换或直接复制：
 
-**注意：** 转换过程中不做内容中转或复述，skill 输出直接作为 raw 内容。
+| 输入类型 | 处理方式 | 说明 |
+|---------|---------|------|
+| 已是完整 Markdown 文件（`.md`） | **直接 `cp` 复制** | 用 `cp -r` 将文件及其资源目录整体复制到 `vault/raw/` |
+| PDF/文档（`.pdf`, `.docx` 等） | `mineru` skill → Markdown | 调用 mineru 转换 |
+| URL | `firecrawl` skill → Markdown | 调用 firecrawl 抓取 |
+| Excel/CSV（`.xlsx`, `.csv`） | `xlsx` skill → Markdown | 调用 xlsx 解析 |
+| 用户口述/对话内容 | 直接整理为 Markdown 文本 | 由 Agent 整理写入 |
+
+#### 直接复制模式（`.md` 文件）
+
+当用户提供的是已经是 Markdown 格式的文件时，**直接用 `cp` 命令复制，不要读取内容后再写入**：
+
+```bash
+cp -r {源文件路径} vault/raw/
+# 如果有配套资源目录，也一并复制
+cp -r {源资源目录路径} vault/raw/
+```
+
+**注意：**
+- 使用 `cp -r` 保留目录结构和所有文件
+- 复制后检查文件名是否冲突，冲突时追加 `_1`, `_2` 等后缀
+- **禁止**读取 `.md` 文件内容后由 Agent 重新写入，这会丢失格式、破坏相对路径引用
+- 复制后添加 frontmatter（如原文件没有）：使用 `sed` 或类似工具在文件头部插入
+
+```markdown
+---
+type: {type}
+source: {来源标识}
+created: {YYYY-MM-DD}
+---
+
+```
 
 ### Step 3：生成文件名 + 落盘 raw
 
@@ -59,12 +90,12 @@ description: Use this skill when the user wants to add raw files to vault/raw/. 
 
 | 场景 | 文件名 | 说明 |
 |------|--------|------|
-| 用户直接提供了文件（PDF/文档/CSV 等） | **保留原文件名**（去掉扩展名，加 `.md`） | 转换后直写到 `vault/raw/` |
+| 用户直接提供了文件（PDF/文档/CSV/Markdown 等） | **保留原文件名** | 转换/复制后直写到 `vault/raw/` |
 | 用户提供了 URL | `{type}_{NNN}.md` | NNN 为同 type 下的递增编号 |
 | 用户口述/对话产生的内容 | `{type}_{NNN}.md` | NNN 为同 type 下的递增编号 |
 
 **判断逻辑：**
-- 如果输入是一个**已有文件**（用户上传的 PDF/文档/CSV 等），保留原文件名（去掉扩展名，加 `.md`）
+- 如果输入是一个**已有文件**（用户上传的文件），保留原文件名
 - 如果输入是 **URL 或口述内容**（没有原始文件名），使用 `{type}_{NNN}.md` 编号命名
 - 文件名冲突时，在文件名后追加 `_1`, `_2` 等后缀避免覆盖
 
@@ -95,21 +126,9 @@ vault/raw/
 
 **注意：** 如果资源文件较多或较大，在 git commit 时一并加入（`git add vault/raw/{filename}.md vault/raw/{资源文件夹}/`）。
 
-#### 写入 raw 文件
+#### 写入后校验
 
-将转换后的 Markdown 内容写入 `vault/raw/{filename}.md`，添加 frontmatter（如果转换工具未提供）：
-
-```markdown
----
-type: {type}
-source: {来源标识}
-created: {YYYY-MM-DD}
----
-
-{转换后的 Markdown 内容}
-```
-
-**写入后校验**：保存 raw 后检查文件大小和行数，如果明显小于预期（如 PDF 原文 20 页但 raw 只有 50 行），告警并重试。同时检查 Markdown 中引用的图片文件是否都已存在。
+保存 raw 后检查文件大小和行数，如果明显小于预期（如 PDF 原文 20 页但 raw 只有 50 行），告警并重试。同时检查 Markdown 中引用的图片文件是否都已存在。
 
 ### Step 4：Git 提交
 
