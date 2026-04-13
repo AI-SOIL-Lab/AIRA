@@ -62,7 +62,7 @@ description: Use this skill when the user asks a research question based on the 
 
 ## 引用
 
-- [[paper_001_digest|Deep Learning for Fatigue Life Prediction]] — 支撑了 XXX 结论
+- [[Zhang_2024_ENSO_digest|A transformer-based coupled ocean-atmosphere model for ENSO studies]] — 支撑了 XXX 结论
 - [[exp_003_digest|热处理优化 Round 2]] — 提供了 YYY 实验数据
 
 ## 进一步问题

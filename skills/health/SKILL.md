@@ -46,6 +46,8 @@ description: Use this skill when checking or maintaining the AIRA knowledge base
 - digest 未被 index 引用 → 追加到 index.md 对应 type 分类下
 - raw 未被 digest 引用 → 该 raw 可能缺少 digest，调用 `ingest` 补生成
 
+**注意：** raw 文件名可能是用户原始文件名（如 `Zhang_2024_ENSO.md`）或编号名（如 `paper_001.md`），需根据实际文件名匹配。
+
 ### 3. index 与 digest 同步
 
 **检查**：index.md 中的条目信息是否与对应 digest 的 frontmatter 一致。
@@ -122,12 +124,12 @@ description: Use this skill when checking or maintaining the AIRA knowledge base
 
 ### 自动修复
 - ✅ 补充了 3 个缺失的 index 条目
-- ✅ 修复了 2 个断链（paper_003_digest → paper_004_digest）
+- ✅ 修复了 2 个断链（Zhang_2024_ENSO_digest → ENSO_Transformer_digest）
 - ✅ 补充了 5 条隐性双链
 - ✅ 同步了 2 个 index/digest 不一致的标签
 
 ### 需用户决策
-- ⚠️ 矛盾：[[paper_001_digest|...]] 与 [[paper_005_digest|...]] 对 X 的效果结论相反
+- ⚠️ 矛盾：[[Zhang_2024_ENSO_digest|...]] 与 [[paper_005_digest|...]] 对 X 的效果结论相反
 - ⚠️ 质量差：[[exp_002_digest|...]] digest 仅 3 行，可能生成失败
 
 ### 统计

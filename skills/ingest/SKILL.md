@@ -35,15 +35,30 @@ description: Use this skill when the user wants to add content to the AIRA knowl
 
 同时确定 type、选择转换方式、直接落盘。**不做内容中转** — skill 输出直写 `vault/raw/`，不让 AI 复述内容。
 
-生成文件名：`{type}_{NNN}.md`，NNN 为同 type 下的递增编号。
+#### 文件名生成规则
+
+**原则：保留原始文件名，避免破坏内部引用（如图片相对路径）。**
+
+| 场景 | 文件名 | 说明 |
+|------|--------|------|
+| 用户直接提供了文件（PDF/文档/CSV 等） | **保留原文件名**（如 `Zhang_2024_ENSO_Transformer.md`） | 转换后直写到 `vault/raw/`，不重命名 |
+| 用户提供了 URL | `{type}_{NNN}.md` | NNN 为同 type 下的递增编号 |
+| 用户口述/对话产生的内容 | `{type}_{NNN}.md` | NNN 为同 type 下的递增编号 |
+
+**判断逻辑：**
+- 如果输入是一个**已有文件**（用户上传的 PDF/文档/CSV 等），保留原文件名（去掉扩展名，加 `.md`）
+- 如果输入是 **URL 或口述内容**（没有原始文件名），使用 `{type}_{NNN}.md` 编号命名
+- 文件名冲突时，在文件名后追加 `_1`, `_2` 等后缀避免覆盖
+
+**注意：** 保留原文件名很重要，因为 Markdown 中的图片等资源可能使用相对路径（如 `images/xxx.jpg`），重命名文件会导致链接失效。
 
 | 输入形式 | type | 转换 + 落盘 |
 |---------|------|------------|
-| 论文 PDF | `paper` | `mineru` skill → Markdown，`write_file` 直写到 `vault/raw/` |
-| 论文 URL | `paper` | `firecrawl` skill → Markdown，`write_file` 直写到 `vault/raw/` |
-| 用户口述的想法 | `idea` | 直接 `write_file` 落盘，source 为 `self` |
-| 实验数据（CSV/Excel） | `experiment` | `xlsx` skill → Markdown，`write_file` 直写到 `vault/raw/` |
-| 对话中产生的洞见 | `discussion` | 直接 `write_file` 落盘，source 为 `aira` |
+| 论文 PDF | `paper` | `mineru` skill → Markdown，保留原文件名，`write_file` 直写到 `vault/raw/` |
+| 论文 URL | `paper` | `firecrawl` skill → Markdown，写入 `{type}_{NNN}.md` |
+| 用户口述的想法 | `idea` | 直接 `write_file` 落盘，写入 `{type}_{NNN}.md`，source 为 `self` |
+| 实验数据（CSV/Excel） | `experiment` | `xlsx` skill → Markdown，保留原文件名，`write_file` 直写到 `vault/raw/` |
+| 对话中产生的洞见 | `discussion` | 直接 `write_file` 落盘，写入 `{type}_{NNN}.md`，source 为 `aira` |
 
 如果用户没有明确指定 type，根据内容自动判断。
 
@@ -69,7 +84,7 @@ raw 是不可变归档，写入后不再修改。
 
 读取 `vault/index.md` 获取已有知识库的全貌，用于判断双链关联。
 
-AI 生成 digest，写入 `vault/digest/{type}_{NNN}_digest.md`：
+AI 生成 digest，写入 `vault/digest/{raw_filename}_digest.md`（其中 `{raw_filename}` 是 raw 文件的实际文件名，不含 `.md` 扩展名）：
 
 ```markdown
 ---
@@ -78,7 +93,7 @@ tags: [{tag1}, {tag2}, {tag3}]
 created: {YYYY-MM-DD}
 source: {来源标识}
 confidence: {1-5}
-raw: "[[{type}_{NNN}]]"
+raw: "[[{raw_filename}]]"
 ---
 
 # {标题}
@@ -104,16 +119,16 @@ raw: "[[{type}_{NNN}]]"
 在 `vault/index.md` 的对应 type 分类下追加一行：
 
 ```markdown
-- [[{type}_{NNN}_digest|{显示名}]] `#tag1` `#tag2` c:{confidence}
+- [[{raw_filename}_digest|{显示名}]] `#tag1` `#tag2` c:{confidence}
 ```
 
-如果该 type 的分类标题不存在，则新建。
+其中 `{raw_filename}` 是 raw 文件的实际文件名（不含 `.md` 扩展名）。如果该 type 的分类标题不存在，则新建。
 
 ### Step 4：Git 提交
 
 ```
-git add vault/raw/{type}_{NNN}.md vault/digest/{type}_{NNN}_digest.md vault/index.md
-git commit -m "ingest: {type}_{NNN} {标题}"
+git add vault/raw/{raw_filename}.md vault/digest/{raw_filename}_digest.md vault/index.md
+git commit -m "ingest: {raw_filename} {标题}"
 ```
 
 ## Obsidian 侧同步
