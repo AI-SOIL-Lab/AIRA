@@ -17,11 +17,11 @@ description: Use this skill when the user wants to add content to the AIRA knowl
 
 | Skill | 用途 | 调用时机 |
 |-------|------|---------|
-| `pdf` | PDF → Markdown 转换（基于 MinerU API） | 用户输入为 `.pdf` 文件时 |
+| `mineru` | PDF/文档 → Markdown 转换（基于 MinerU API） | 用户输入为 `.pdf` 等文档文件时 |
 | `firecrawl` | 网页抓取 → Markdown | 用户输入为 URL 时 |
 | `xlsx` | Excel/CSV 解析 | 用户输入为 `.xlsx` / `.csv` 文件时 |
 
-调用方式：使用对应的 skill tool（如 `skill: "pdf"`、`skill: "firecrawl"`、`skill: "xlsx"`），将原始内容转换为 Markdown 后，进入后续流程。
+调用方式：使用对应的 skill tool（如 `skill: "mineru"`、`skill: "firecrawl"`、`skill: "xlsx"`），将原始内容转换为 Markdown 后，进入后续流程。
 
 ## 前置：Git 检查
 
@@ -39,7 +39,7 @@ description: Use this skill when the user wants to add content to the AIRA knowl
 
 | 输入形式 | type | 转换 + 落盘 |
 |---------|------|------------|
-| 论文 PDF | `paper` | `pdf` skill → Markdown，`write_file` 直写到 `vault/raw/` |
+| 论文 PDF | `paper` | `mineru` skill → Markdown，`write_file` 直写到 `vault/raw/` |
 | 论文 URL | `paper` | `firecrawl` skill → Markdown，`write_file` 直写到 `vault/raw/` |
 | 用户口述的想法 | `idea` | 直接 `write_file` 落盘，source 为 `self` |
 | 实验数据（CSV/Excel） | `experiment` | `xlsx` skill → Markdown，`write_file` 直写到 `vault/raw/` |

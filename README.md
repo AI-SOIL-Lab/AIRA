@@ -23,30 +23,88 @@ raw/              →  完整内容                        （最重，最终推
 - [Qwen Code](https://github.com/QwenLM/qwen-code)（作为 AI Agent 运行时）
 - [Obsidian](https://obsidian.md/)（作为前端，零开发成本使用 `[[wikilink]]` 图谱可视化）
 - [Git](https://git-scm.com/)（协作同步机制，用户无需手动操作）
+- [uv](https://github.com/astral-sh/uv)（Python 包管理器，用于管理项目虚拟环境）
+
+### Python 环境管理
+
+本项目使用 `uv` 管理 Python 虚拟环境和依赖，**不要直接使用系统全局 Python**。
+
+```bash
+# 创建虚拟环境
+uv venv
+
+# 激活环境
+source .venv/bin/activate
+```
+
+### 安装
+
+在目标项目根目录下执行：
+
+```bash
+# 克隆 AIRA 到 .qwen 目录
+mkdir -p .qwen && cd .qwen
+git clone https://github.com/AI-SOIL-Lab/AIRA .
+cd ..
+
+# 复制 QWEN.md 到项目根目录
+cp .qwen/QWEN.md ./
+```
 
 ### 安装外部 Skill
 
-AIRA 依赖三个外部 skill 来处理不同格式的输入：
+AIRA 的外部 skill 已内置于 `skills/` 目录，**无需额外安装**。但以下 skill 依赖的 Python 包需要在 uv 虚拟环境中安装：
 
 ```bash
-# PDF → Markdown（基于 MinerU API，已内置，无需安装）
-# 如需使用 MinerU 精准解析 API，请配置 .env 文件中的 MINERU_TOKEN
-
-# Excel/CSV 解析
-npx skills add anthropics/skills@xlsx -y
-
-# 网页抓取 → Markdown
-npx skills add firecrawl/cli@firecrawl -y
+# 激活虚拟环境
+source .venv/bin/activate
 ```
 
-**PDF Skill 配置：**
+**Skill Python 依赖：**
+
+| Skill | Python 依赖 | 说明 |
+|-------|------------|------|
+| `xlsx` | `pandas`, `openpyxl` | Excel/CSV 读写、公式重算 |
+| `firecrawl` | 无（CLI 工具） | 需要 `FIRECRAWL_API_KEY` 环境变量 |
+
+**安装依赖：**
+
 ```bash
-# 复制环境变量模板
-cp .env.example .env
+# xlsx skill 依赖
+uv pip install pandas openpyxl
 
-# 编辑 .env 文件，填入你的 MinerU Token（可选）
-# Token 申请地址：https://mineru.net/apiManage
+# firecrawl CLI（非 Python 包）
+# 需配置 FIRECRAWL_API_KEY 环境变量
 ```
+
+> **LibreOffice 依赖：** `xlsx` skill 的公式重算功能依赖 LibreOffice，需确保系统已安装。
+
+### MinerU CLI 安装（可选）
+
+MinerU CLI 用于 PDF/文档 → Markdown 转换（非 Python 包，独立安装）：
+
+```bash
+curl -fsSL https://cdn-mineru.openxlab.org.cn/open-api-cli/install.sh | sh
+```
+
+### MinerU 配置（可选）
+
+MinerU 支持两种模式，未配置 Token 时默认使用 `flash-extract`（免登录但有限制）：
+
+| 模式 | 适用场景 | Token 要求 | 限制 |
+|------|---------|-----------|------|
+| `flash-extract` | 快速提取小文件 | 不需要 | ≤10MB, ≤20页，仅 Markdown |
+| `extract` | 精准提取/大文件 | 需要 | 更高配额，支持表格/公式/多格式 |
+
+**Token 配置方式：**
+
+```bash
+# 1. 申请 Token：https://mineru.net/apiManage/token
+# 2. 通过 CLI 配置
+mineru-open-api auth  # 交互式设置
+```
+
+> **提示：** Token 解析优先级：`--token` 参数 > `MINERU_TOKEN` 环境变量 > `~/.mineru/config.yaml`
 
 ### 初始化知识库
 
