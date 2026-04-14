@@ -190,9 +190,8 @@ def copy_md_with_resources(
     for item in src_dir.iterdir():
         if item.is_dir() and item.name in ("images", "figures", "tables", "assets"):
             dest_resource_dir = dest_dir / item.name
-            dest_resource_dir.mkdir(parents=True, exist_ok=True)
-            shutil.copytree(item, dest_resource_dir / item.name, dirs_exist_ok=True)
-            logger.info(f"Copied resource directory: {item} -> {dest_resource_dir / item.name}")
+            shutil.copytree(item, dest_resource_dir, dirs_exist_ok=True)
+            logger.info(f"Copied resource directory: {item} -> {dest_resource_dir}")
 
     return dest_md_path
 

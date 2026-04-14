@@ -32,6 +32,7 @@ AIRA/
     │   └── aira-orchestration.md  # 全局编排规则（每次对话自动注入）
     └── skills/
         ├── ingest/SKILL.md        # 内容入库 skill
+        ├── aminer-*/SKILL.md      # 学术搜索 skill
         ├── research/SKILL.md      # 知识库问答 skill
         └── health/SKILL.md        # 知识库健康检查 skill
 ```
@@ -101,6 +102,29 @@ AIRA/
 6. 质量检测（内容过短、缺少 Key Findings 等）
 
 **修复策略：** 能自动修复的直接处理，需要用户判断的提交给用户。
+
+### 5. AMiner（学术搜索）
+
+**触发：** 学术相关查询，如"查某位学者"、"找某篇论文"、"Transformer 最新进展"、"查某个机构/期刊"
+
+**实现方式：** `aminer-open-skill` 提供 AMiner 开放平台的学术数据查询能力，包含两个 skill：
+
+| Skill | 定位 | 说明 |
+|-------|------|------|
+| `aminer-free-search` | 轻量初筛 | 免费接口，适合论文/学者/机构/期刊的发现与初筛、实体标准化 |
+| `aminer-data-search` | 深度分析 | 全量版，覆盖 27 个接口和 6 个分析工作流（scholar_profile、paper_deep_dive 等） |
+| `aminer-daily-paper` | 论文跟踪 | 适合追踪最新的研究进展 |
+
+**典型使用场景：**
+- 查学者：简介、研究方向、论文、专利、项目
+- 查论文：详情、引用关系、关键词扩展
+- 查机构/期刊：学者规模、论文产出、专利分布
+- 自然语言问答：如"Transformer 最新进展"
+- 专利查询：技术方向专利、学者/机构专利关系
+
+**路由策略：** 学术查询优先路由到 AMiner skill。先用 `aminer-free-search` 轻量初筛，需要深度分析时再升级到 `aminer-data-search`。追踪最新研究进展时使用 `aminer-daily-paper`。
+
+**Token 配置：** 需要在 AMiner 控制台生成 Token：https://open.aminer.cn/open/board?tab=control
 
 ## 文件操作约束
 
